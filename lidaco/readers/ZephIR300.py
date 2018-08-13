@@ -133,27 +133,27 @@ class ZephIR300(Reader):
                 proportion_of_rain.long_name = 'indictor for rain; 1 is rain 0 no rain'
 
             if 'Lower Temp. (C)' in df.columns:
-                TMin = output_dataset.createVariable('TMin', 'f4', ('time',))
+                TMin = output_dataset.createVariable('T_min', 'f4', ('time',))
                 TMin.units = 'degrees C'
                 TMin.long_name = 'min of temperature'
                 
             if 'Upper Temp. (C)' in df.columns:
-                TMax = output_dataset.createVariable('TMax', 'f4', ('time',))
+                TMax = output_dataset.createVariable('T_max', 'f4', ('time',))
                 TMax.units = 'degrees C'
                 TMax.long_name = 'max of temperature'
                 
             if any(('Horizontal Wind Speed Min' in column) for column in df.columns):
-                WSMin = output_dataset.createVariable('WSMin', 'f4', ('time', 'range'))
+                WSMin = output_dataset.createVariable('WS_min', 'f4', ('time', 'range'))
                 WSMin.units = 'm.s-1'
                 WSMin.long_name = 'min of scalar wind speed'
                 
             if any(('Horizontal Wind Speed Max' in column) for column in df.columns):
-                WSMax = output_dataset.createVariable('WSMax', 'f4', ('time', 'range'))
+                WSMax = output_dataset.createVariable('WS_max', 'f4', ('time', 'range'))
                 WSMax.units = 'm.s-1'
                 WSMax.long_name = 'max of scalar wind speed'
                 
             if any(('Horizontal Wind Speed Std. Dev.' in column) for column in df.columns):
-                WSStd = output_dataset.createVariable('WSStd', 'f4', ('time', 'range'))
+                WSStd = output_dataset.createVariable('WS_std', 'f4', ('time', 'range'))
                 WSStd.units = 'm.s-1'
                 WSStd.long_name = 'std of scalar wind speed'
                 
@@ -180,9 +180,9 @@ class ZephIR300(Reader):
         
         if ten_min_file:
             if 'Lower Temp. (C)' in df.columns:
-                output_dataset.variables['TMin'][:] = df['Lower Temp. (C)'].values
+                output_dataset.variables['T_min'][:] = df['Lower Temp. (C)'].values
             if 'Upper Temp. (C)' in df.columns:
-                output_dataset.variables['TMax'][:] = df['Upper Temp. (C)'].values
+                output_dataset.variables['T_max'][:] = df['Upper Temp. (C)'].values
             if 'Proportion Of Packets With Rain (%)' in df.columns:
                 output_dataset.variables['proportion_of_rain'][:] = df['Proportion Of Packets With Rain (%)'].values
             elif 'Raining' in df.columns:
@@ -197,19 +197,19 @@ class ZephIR300(Reader):
             if any(bool_WSMin):
                 WSMin_list = df.loc[:,bool_WSMin]
                 WSMin_list_complete = pd.concat([WSMin_list, pd.Series(np.full_like(met_ws_list, np.nan))],join='inner',axis=1)
-                output_dataset.variables['WSMin'][:] = WSMin_list_complete.values
+                output_dataset.variables['WS_min'][:] = WSMin_list_complete.values
         
             bool_WSMax = ['Horizontal Wind Speed Max' in column for column in df.columns]
             if any(bool_WSMax):
                 WSMax_list = df.loc[:,bool_WSMax]
                 WSMax_list_complete = pd.concat([WSMax_list, pd.Series(np.full_like(met_ws_list, np.nan))],join='inner',axis=1)
-                output_dataset.variables['WSMax'][:] = WSMax_list_complete.values
+                output_dataset.variables['WS_max'][:] = WSMax_list_complete.values
                 
             bool_WSStd = ['Horizontal Wind Speed Std. Dev.' in column for column in df.columns]
             if any(bool_WSStd):
                 WSStd_list = df.loc[:,bool_WSStd]
                 WSStd_list_complete = pd.concat([WSStd_list, pd.Series(np.full_like(met_ws_list, np.nan))],join='inner',axis=1)
-                output_dataset.variables['WSStd'][:] = WSStd_list_complete.values
+                output_dataset.variables['WS_std'][:] = WSStd_list_complete.values
 
 
     def read_to(self, output_dataset, input_filepath, configs, appending):
