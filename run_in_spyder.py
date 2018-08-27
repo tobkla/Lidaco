@@ -1,7 +1,7 @@
 from lidaco.core.Builder import Builder
 import os
 
-meas_ID = '95'
+meas_ID = '88'
 
 
 errLog = r'.\Lidar data\converted\0'+meas_ID+'\error.log'
@@ -23,5 +23,3 @@ if os.path.isfile(errLog):
     
     for file in errFiles:   
         os.remove(file[:-1])
-        
-#bla
