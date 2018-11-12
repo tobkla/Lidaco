@@ -130,7 +130,7 @@ class Windcubev1(Reader):
             T_internal.units = 'degrees C'
             T_internal.long_name = 'internal_temperature'
             
-            wiper_state = output_dataset.createVariable('wiper_state', 'f4', ('time',))
+            wiper_state = output_dataset.createVariable('wiper_state', str, ('time',))
             wiper_state.units = ''
             wiper_state.long_name = 'wiper_state'
         
@@ -224,7 +224,7 @@ class Windcubev1(Reader):
         if self.parameters['filetype'] == 'rtd': # high resolution data
             output_dataset.variables['time'][:] = df['Date'].values
             output_dataset.variables['T_internal'][:] = df['Temperature (°C)'].values
-            output_dataset.variables['wiper'][:] = df['Wiper'].values
+            output_dataset.variables['wiper_state'][:] = df['Wiper'].values
             output_dataset.variables['azimuth_angle'][:] = df['azimuth_angle'].values
             output_dataset.variables['elevation_angle'][:] = df['elevation_angle'].values
             output_dataset.variables['VEL'][:, :] = df.loc[:,['Vh-' in column for column in df.columns]]
@@ -257,15 +257,15 @@ class Windcubev1(Reader):
 
     
     def read_to(self, output_dataset, input_filepath, configs, appending):
-        try:
-            df = self.load_file(input_filepath)
-            self.create_variables(output_dataset)
-            self.write_file(output_dataset, df)
-        except Exception as err:
-            print('Error ocurred while converting %s. See error.log for details.' % input_filepath)
-            print(err)
-            with open(Path(output_dataset.filepath()).parent / 'error.log','a') as logfile:
-                logfile.write( '%s'%output_dataset.filepath() +'\n')
+#        try:
+        df = self.load_file(input_filepath)
+        self.create_variables(output_dataset)
+        self.write_file(output_dataset, df)
+#        except Exception as err:
+#            print('Error ocurred while converting %s. See error.log for details.' % input_filepath)
+#            print(err)
+#            with open(Path(output_dataset.filepath()).parent / 'error.log','a') as logfile:
+#                logfile.write( '%s'%output_dataset.filepath() +'\n')
                 
                 
 if __name__ == '__main__':
