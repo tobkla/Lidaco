@@ -257,15 +257,15 @@ class Windcubev1(Reader):
 
     
     def read_to(self, output_dataset, input_filepath, configs, appending):
-#        try:
-        df = self.load_file(input_filepath)
-        self.create_variables(output_dataset)
-        self.write_file(output_dataset, df)
-#        except Exception as err:
-#            print('Error ocurred while converting %s. See error.log for details.' % input_filepath)
-#            print(err)
-#            with open(Path(output_dataset.filepath()).parent / 'error.log','a') as logfile:
-#                logfile.write( '%s'%output_dataset.filepath() +'\n')
+        try:
+            df = self.load_file(input_filepath)
+            self.create_variables(output_dataset)
+            self.write_file(output_dataset, df)
+        except Exception as err:
+            print('Error ocurred while converting %s. See error.log for details.' % input_filepath)
+            print(err)
+            with open(Path(output_dataset.filepath()).parent / 'error.log','a') as logfile:
+                logfile.write( '%s'%output_dataset.filepath() +'\n')
                 
                 
 if __name__ == '__main__':
