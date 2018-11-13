@@ -133,7 +133,24 @@ class Windcubev1(Reader):
             wiper_state = output_dataset.createVariable('wiper_state', str, ('time',))
             wiper_state.units = ''
             wiper_state.long_name = 'wiper_state'
-        
+            
+            AZI = output_dataset.createVariable('AZI', 'f4', ('time', 'range'))
+            AZI.units = 'degrees'
+            AZI.long_name = 'wind_direction'
+            
+            u = output_dataset.createVariable('u', 'f4', ('time', 'range'))
+            u.units = 'm.s-1'
+            u.long_name = 'u_component_of_wind_speed'
+            
+            v = output_dataset.createVariable('v', 'f4', ('time', 'range'))
+            v.units = 'm.s-1'
+            v.long_name = 'v_component_of_wind_speed'
+            
+            w = output_dataset.createVariable('w', 'f4', ('time', 'range'))
+            w.units = 'm.s-1'
+            w.long_name = 'w_component_of_wind_speed'
+            
+
         # 10 minute mean data sta files
         else:
             WS = output_dataset.createVariable('WS', 'f4', ('time', 'range'))
@@ -216,7 +233,8 @@ class Windcubev1(Reader):
             wiper.units = ''
             wiper.long_name = 'wiper_count'
 
-    
+
+
     def write_file(self, output_dataset, df):
         output_dataset.variables['scan_type'][:] = 2
         output_dataset.variables['accumulation_time'][:] = 1.0
@@ -228,9 +246,14 @@ class Windcubev1(Reader):
             output_dataset.variables['azimuth_angle'][:] = df['azimuth_angle'].values
             output_dataset.variables['elevation_angle'][:] = df['elevation_angle'].values
             output_dataset.variables['VEL'][:, :] = df.loc[:,['Vh-' in column for column in df.columns]]
+            output_dataset.variables['AZI'][:, :] = df.loc[:,['Azi ' in column for column in df.columns]]
             output_dataset.variables['WIDTH'][:, :] = df.loc[:,['RWS-' in column for column in df.columns]]
             output_dataset.variables['CNR'][:, :] = df.loc[:,['CNR-' in column for column in df.columns]]
-            
+            output_dataset.variables['u'][:, :] = df.loc[:,['u-' in column for column in df.columns]]
+            output_dataset.variables['v'][:, :] = df.loc[:,['v-' in column for column in df.columns]]
+            output_dataset.variables['w'][:, :] = df.loc[:,['w-' in column for column in df.columns]]
+
+
 			# filetype == 'sta' # 10 minute mean values
         else:
             output_dataset.variables['time'][:] = df['Date'].values
