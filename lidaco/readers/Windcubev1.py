@@ -1,3 +1,5 @@
+import sys
+sys.path.insert(0, r'C:\Users\lpauscher\Documents\python_scripts\git\Lidaco')
 import datetime
 import numpy as np
 from pathlib import Path
@@ -106,6 +108,11 @@ class Windcubev1(Reader):
 
         # high resolution rtd files
         if self.parameters['filetype'] == 'rtd':
+            
+            WS = output_dataset.createVariable('WS', 'f4', ('time', 'range'))
+            WS.units = 'm.s-1'
+            WS.long_name = 'scalar_wind_speed'
+            
             VEL = output_dataset.createVariable('VEL', 'f4', ('time', 'range'))
             VEL.units = 'm.s-1'
             VEL.long_name = 'radial_velocity'
@@ -245,9 +252,10 @@ class Windcubev1(Reader):
             output_dataset.variables['wiper_state'][:] = df['Wiper'].values
             output_dataset.variables['azimuth_angle'][:] = df['azimuth_angle'].values
             output_dataset.variables['elevation_angle'][:] = df['elevation_angle'].values
-            output_dataset.variables['VEL'][:, :] = df.loc[:,['Vh-' in column for column in df.columns]]
+            output_dataset.variables['WS'][:, :] = df.loc[:,['Vh-' in column for column in df.columns]]
+            output_dataset.variables['VEL'][:, :] = df.loc[:,['RWS-' in column for column in df.columns]]
             output_dataset.variables['AZI'][:, :] = df.loc[:,['Azi ' in column for column in df.columns]]
-            output_dataset.variables['WIDTH'][:, :] = df.loc[:,['RWS-' in column for column in df.columns]]
+            output_dataset.variables['WIDTH'][:, :] = df.loc[:,['RWSD-' in column for column in df.columns]]
             output_dataset.variables['CNR'][:, :] = df.loc[:,['CNR-' in column for column in df.columns]]
             output_dataset.variables['u'][:, :] = df.loc[:,['u-' in column for column in df.columns]]
             output_dataset.variables['v'][:, :] = df.loc[:,['v-' in column for column in df.columns]]
@@ -294,7 +302,7 @@ class Windcubev1(Reader):
 if __name__ == '__main__':
     #debugging purposes
     import netCDF4 as nc
-    file1 = r'C:\Users\skulla\Desktop\WLS7-71_2017_07_20__00_00_00.sta'
+    file1 = r'C:\Users\lpauscher\Documents\python_scripts\git\Lidaco\Lidar data\rtd_example\Converted_WLS7-71_2015_06_10__00_00_00.rtd'
     test = Windcubev1()
     
     with nc.Dataset('test.nc', 'w', format='NETCDF4') as dataset:
