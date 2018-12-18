@@ -1,8 +1,11 @@
+import sys
+sys.path.insert(0, r'C:\Users\lpauscher\Documents\python_scripts\git\Lidaco')
 import numpy as np
 from pathlib import Path
 from lidaco.core.Reader import Reader
 import datetime
 import pandas as pd
+
 
 
 class Windcubev2(Reader):
@@ -63,7 +66,7 @@ class Windcubev2(Reader):
         if self.parameters['filetype'] == 'rtd':
             df['azimuth_angle']=df.Position.apply(self.parse_azimuth)
             df['elevation_angle']=df.Position.apply(self.parse_elevation)
-
+    
         return df
 
     def create_variables(self, output_dataset):
@@ -112,6 +115,15 @@ class Windcubev2(Reader):
 
         # create the measurement variables
         if self.parameters['filetype'] == 'rtd':
+            
+            WS = output_dataset.createVariable('WS', 'f4', ('time', 'range'))
+            WS.units = 'm.s-1'
+            WS.long_name = 'scalar_wind_speed'
+            
+            DIR = output_dataset.createVariable('DIR', 'f4', ('time', 'range'))
+            DIR.units = 'degrees'
+            DIR.long_name = 'wind_direction'
+            
             VEL = output_dataset.createVariable('VEL', 'f4', ('time', 'range'))
             VEL.units = 'm.s-1'
             VEL.long_name = 'radial_velocity'
@@ -229,6 +241,8 @@ class Windcubev2(Reader):
             output_dataset.variables['wiper'][:] = df['Wiper Count'].values
             output_dataset.variables['azimuth_angle'][:] = df['azimuth_angle'].values
             output_dataset.variables['elevation_angle'][:] = df['elevation_angle'].values
+            output_dataset.variables['WS'][:, :] = df.loc[:,['m Wind Speed (m/s)' in column for column in df.columns]]
+            output_dataset.variables['DIR'][:, :] = df.loc[:,['Wind Direction (°)' in column for column in df.columns]]
             output_dataset.variables['VEL'][:, :] = df.loc[:,['Radial Wind Speed (m/s)' in column for column in df.columns]]
             output_dataset.variables['WIDTH'][:, :] = df.loc[:,['Radial Wind Speed Dispersion (m/s)' in column for column in df.columns]]
             output_dataset.variables['CNR'][:, :] = df.loc[:,['CNR (dB)' in column for column in df.columns]]
@@ -269,10 +283,10 @@ class Windcubev2(Reader):
 if __name__ == '__main__':
     #debugging
     import netCDF4 as nc
-    path_sta = r'C:\Users\skulla\Documents\GitHub\Lidaco_gitlab\samples\WindcubeV2\sta\WLS7-164_2016_11_24__00_00_00.sta'
-    path_rtd = r'C:\Users\skulla\Documents\GitHub\Lidaco_gitlab\samples\WindcubeV2\rtd\WLS7-164_2016_11_24__00_00_00.rtd'
+    path_rtd = r'C:\Users\lpauscher\Documents\python_scripts\git\Lidaco\Lidar data\rtd_example\WLS7-196_2017_11_22__00_00_00.rtd'
     test = Windcubev2()
     
-    with nc.Dataset('test.nc', 'w', format='NETCDF4') as dataset:
+    with nc.Dataset('test2.nc', 'w', format='NETCDF4') as dataset:
+        loaded_data = test.load_file(path_rtd)
         loaded_data = test.read_to(dataset,path_rtd,None,None)
                 
