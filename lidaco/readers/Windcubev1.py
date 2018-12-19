@@ -1,5 +1,3 @@
-import sys
-sys.path.insert(0, r'C:\Users\lpauscher\Documents\python_scripts\git\Lidaco')
 import datetime
 import numpy as np
 from pathlib import Path
