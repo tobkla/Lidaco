@@ -161,7 +161,19 @@ class Windcubev2(Reader):
             wiper = output_dataset.createVariable('wiper', 'f4', ('time',))
             wiper.units = 'V'
             wiper.long_name = 'Wiper count Vbatt'
-        
+            
+            u = output_dataset.createVariable('u', 'f4', ('time', 'range'))
+            u.units = 'm.s-1'
+            u.long_name = 'u_component_of_wind_speed'
+    
+            v = output_dataset.createVariable('v', 'f4', ('time', 'range'))
+            v.units = 'm.s-1'
+            v.long_name = 'v_component_of_wind_speed'
+    
+            w = output_dataset.createVariable('w', 'f4', ('time', 'range'))
+            w.units = 'm.s-1'
+            w.long_name = 'w_component_of_wind_speed'
+
         else:
             WS = output_dataset.createVariable('WS', 'f4', ('time', 'range'))
             WS.units = 'm.s-1'
@@ -244,6 +256,10 @@ class Windcubev2(Reader):
             output_dataset.variables['VEL'][:, :] = df.loc[:,['Radial Wind Speed (m/s)' in column for column in df.columns]]
             output_dataset.variables['WIDTH'][:, :] = df.loc[:,['Radial Wind Speed Dispersion (m/s)' in column for column in df.columns]]
             output_dataset.variables['CNR'][:, :] = df.loc[:,['CNR (dB)' in column for column in df.columns]]
+            output_dataset.variables['u'][:, :] = df.loc[:,['X-wind (m/s)' in column for column in df.columns]]
+            output_dataset.variables['v'][:, :] = df.loc[:,['Y-wind (m/s)' in column for column in df.columns]]
+            output_dataset.variables['w'][:, :] = df.loc[:,['Z-wind (m/s)' in column for column in df.columns]]
+
             
 			# filetype == 'sta' # 10 minute mean values
         else:
