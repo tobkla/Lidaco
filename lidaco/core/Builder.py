@@ -1,5 +1,7 @@
 from os import path
 import pathlib
+import pandas as pd
+from datetime import datetime
 
 from lidaco.core.Writer import Writer
 
@@ -26,6 +28,7 @@ class Builder:
     def __init__(self,
                  config_file=None,
                  input_path=None,
+                 output_path=None,
                  output_format=None,
                  input_format=None,
                  context='',
@@ -54,7 +57,10 @@ class Builder:
 
         if input_path is not None:
             root_configs['parameters']['input']['path'] = input_path
-
+            
+        if output_path is not None:
+            root_configs['parameters']['output']['path'] = output_path 
+            
         if input_format is not None:
             root_configs['parameters']['input']['format'] = input_format
 
@@ -143,18 +149,34 @@ class Builder:
         reader.set_configs(self.configs)
         reader.verify_parameters()
         input_path = self.configs.get_resolved('parameters', 'input', 'path')
-        output_path = path.join(input_path,self.params('output', 'path'))
+        output_path = self.configs.get_resolved('parameters', 'output', 'path')
         pathlib.Path(output_path).mkdir(parents=True, exist_ok=True)
         
         files = reader.fetch_input_files(input_path)
-
+        
+        first_of_batch_timestamp = pd.Timestamp('01-01-1904')
+        
         for i, group in enumerate(files):
 
-            obs = self.params('output_block_size') if self.configs.exists('parameters', 'output_block_size') else 1
+            obs = self.configs.get('parameters', 'output_block_size') if self.configs.exists('parameters', 'output_block_size') else 1
+            
             if obs is None:
                 obs = len(files)
+            
+            
+            if isinstance(obs, int):
+                first_of_batch = (i % obs == 0)
+                
+            elif isinstance(obs, str):
+                timedelta = pd.Timedelta(obs)
+                first_timestamp_of_file = reader.get_timestamp(path.join(input_path, group['id']))
+                first_timestamp_of_file_floored = pd.Timestamp(first_timestamp_of_file).floor(obs)
+                
+                first_of_batch = ((first_of_batch_timestamp + timedelta) < first_timestamp_of_file)
 
-            first_of_batch = (i % obs == 0)
+                if first_of_batch:
+                    first_of_batch_timestamp = first_timestamp_of_file_floored
+
 
             if first_of_batch:
                 output_name = reader.output_filename(group['id'])

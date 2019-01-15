@@ -1,5 +1,6 @@
 from ..core.Reader import Reader
 from datetime import datetime, timedelta
+import pandas as pd
 import numpy as np
 
 
@@ -13,6 +14,18 @@ class Windscanner(Reader):
 
     def output_filename(self, timestamp):
         return timestamp[:-9]
+    
+    def get_timestamp(self, input_filepath, row_of_timestamp = 0 ):
+        start_date = datetime(1904,1,1)
+        
+        with open(input_filepath) as f:
+            line = f.readlines()[row_of_timestamp]
+            
+        timestamp_seconds = float(line.split(';')[4])
+        timestamp = start_date + timedelta(seconds=timestamp_seconds)
+        
+        return timestamp
+        
 
     def read_to(self, output_dataset, input_filepaths, parameters, appending):
         wind_file = input_filepaths
