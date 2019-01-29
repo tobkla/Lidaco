@@ -1,8 +1,8 @@
 from ..core.Reader import Reader
+from ..common.Logger import Logger
 from datetime import datetime, timedelta
-import pandas as pd
 import numpy as np
-
+import os
 
 class Windscanner(Reader):
 
@@ -26,15 +26,31 @@ class Windscanner(Reader):
         
         return timestamp
         
+    
+    
 
     def read_to(self, output_dataset, input_filepaths, parameters, appending):
+
         wind_file = input_filepaths
 
         with open(wind_file) as f:
             wind_file_data = f.readlines()
 
-        wind_file_data = list(zip(*[row.strip().split(';') 
-                            for row in wind_file_data]))
+
+        wind_file_data = [row.strip().split(';') for row in wind_file_data]
+
+        # check if file is corrupt by comparing the count of columns in each row
+        columns_in_row = [len(row) for row in  wind_file_data]
+        median_columns = int(np.median(columns_in_row))
+        column_differs = np.not_equal(columns_in_row, median_columns)
+        any_column_differs = any(column_differs)
+    
+        if any_column_differs:
+            Logger.warn('file_corrupt', os.path.split(wind_file)[1] )
+            return 0
+        
+
+        wind_file_data = list(zip(*wind_file_data))
 
         if not appending:
 
@@ -289,3 +305,4 @@ class Windscanner(Reader):
             output_dataset.variables['WIDTH'][ntime:, :] = list(
                     zip(*[[float(value) for value in row] 
                     for row in wind_file_data[index_columns + 7::4]]))
+                
