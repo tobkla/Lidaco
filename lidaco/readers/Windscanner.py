@@ -44,10 +44,12 @@ class Windscanner(Reader):
         median_columns = int(np.median(columns_in_row))
         column_differs = np.not_equal(columns_in_row, median_columns)
         any_column_differs = any(column_differs)
+        
     
         if any_column_differs:
+            wind_file_data = [row for row in wind_file_data if (len(row) == median_columns)]
             Logger.warn('file_corrupt', os.path.split(wind_file)[1] )
-            return 0
+            
         
 
         wind_file_data = list(zip(*wind_file_data))
