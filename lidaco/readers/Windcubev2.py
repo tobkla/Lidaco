@@ -1,8 +1,9 @@
 import numpy as np
 from pathlib import Path
-from lidaco.core.Reader import Reader
-import datetime
+from ..core.Reader import Reader
+from datetime import datetime
 import pandas as pd
+
 
 
 
@@ -28,11 +29,31 @@ class Windcubev2(Reader):
     
     def parse_time(self, string1):
         if self.parameters['filetype'] == 'rtd':
-            temp = datetime.datetime.strptime(string1,'%Y/%m/%d %H:%M:%S.%f')
+            temp = datetime.strptime(string1,'%Y/%m/%d %H:%M:%S.%f')
         else:
-            temp = datetime.datetime.strptime(string1,'%Y/%m/%d %H:%M')
+            temp = datetime.strptime(string1,'%Y/%m/%d %H:%M')
         return temp.isoformat() + 'Z'
         
+    
+    @staticmethod
+    def get_timestamp(input_filepath, row_of_timestamp = 0 ):
+        with open(input_filepath) as f:
+            line = f.readlines()[42 + row_of_timestamp]
+            
+        filetype = input_filepath.split('.')[1]
+        
+        if filetype == 'rtd':
+            timestamp = datetime.strptime(line.split('\t')[0], 
+                                          '%Y/%m/%d %H:%M:%S.%f')
+            
+        elif filetype == 'sta':
+            timestamp = datetime.strptime(line.split('\t')[0], 
+                                          '%Y/%m/%d %H:%M')
+            
+        return timestamp
+    
+    
+
     def parse_azimuth(self, string1):
         if string1 == 'V':
             return 0
@@ -293,14 +314,3 @@ class Windcubev2(Reader):
             with open(Path(output_dataset.filepath()).parent / 'error.log','a') as logfile:
                 logfile.write( '%s'%output_dataset.filepath() +'\n')
                     
-
-if __name__ == '__main__':
-    #debugging
-    import netCDF4 as nc
-    path_rtd = r'C:\Users\lpauscher\Documents\python_scripts\git\Lidaco\Lidar data\rtd_example\WLS7-196_2017_11_22__00_00_00.rtd'
-    test = Windcubev2()
-    
-    with nc.Dataset('test2.nc', 'w', format='NETCDF4') as dataset:
-        loaded_data = test.load_file(path_rtd)
-        loaded_data = test.read_to(dataset,path_rtd,None,None)
-                

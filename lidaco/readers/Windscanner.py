@@ -26,8 +26,6 @@ class Windscanner(Reader):
         
         return timestamp
         
-    
-    
 
     def read_to(self, output_dataset, input_filepaths, parameters, appending):
 

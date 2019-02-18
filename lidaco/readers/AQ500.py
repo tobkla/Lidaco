@@ -1,6 +1,10 @@
 import numpy as np
 from ..core.Reader import Reader
-import datetime
+from datetime import datetime
+
+
+
+
 
 class AQ500(Reader):
 
@@ -26,6 +30,19 @@ class AQ500(Reader):
                 return float(string1)
             except ValueError:
                 return string1
+
+    @staticmethod
+    def get_timestamp(input_filepath, row_of_timestamp = 0 ):
+        with open(input_filepath) as f:
+            line = f.readlines()[28 + row_of_timestamp]
+            
+
+        timestamp = datetime.strptime(line.split(',')[0], 
+                                          '%Y%m%d  %H:%M')
+            
+        return timestamp
+
+
 
     def correct_ws(ws_array,range_array):
         corr_array = np.ones_like(ws_array)
@@ -115,7 +132,7 @@ class AQ500(Reader):
             data_timeseries = [line[:-1].split(',') for line in data[temp_headerlength+2:-2]]
             data_timeseries_array = np.array(data_timeseries)[:,1:].astype(float)
             
-            timestamp_input = [datetime.datetime.strptime(row[0],'%Y%m%d %H:%M') for row in data_timeseries]
+            timestamp_input = [datetime.strptime(row[0],'%Y%m%d %H:%M') for row in data_timeseries]
             timestamp_iso8601 = [value.isoformat()+'Z' for value in timestamp_input]
             output_dataset.variables['time'][:] = np.array(timestamp_iso8601)
 
@@ -130,3 +147,6 @@ class AQ500(Reader):
             # there is an error reading signal_quality for our data because there are only 30 columns, but 31 heights
             # we commented it out but it might be useful for future measurements
             # output_dataset.variables['signal_quality'][:, :] = data_timeseries_array[:,datafield['Quality(S/N*10)(LL to HL)']]
+            
+            
+            

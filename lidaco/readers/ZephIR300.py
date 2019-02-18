@@ -1,8 +1,6 @@
 import numpy as np
-#from ..core import Reader
-from lidaco.core.Reader import Reader
-
-import datetime
+from ..core import Reader
+from datetime import datetime
 import pandas as pd
 import re
 from pathlib import Path
@@ -20,14 +18,26 @@ class ZephIR300(Reader):
 
     def parse_time(self, string1):
             try:
-                temp = datetime.datetime.strptime(string1,'%d.%m.%Y %H:%M:%S')
+                temp = datetime.strptime(string1,'%d.%m.%Y %H:%M:%S')
             except:
                 try:
-                    temp = datetime.datetime.strptime(string1,'%d/%m/%Y %H:%M:%S')
+                    temp = datetime.strptime(string1,'%d/%m/%Y %H:%M:%S')
                 except:
-                    temp = datetime.datetime.strptime(string1,'%d.%m.%Y %H:%M')
+                    temp = datetime.strptime(string1,'%d.%m.%Y %H:%M')
             temp = temp.isoformat() +'Z'
             return temp
+
+
+    @staticmethod
+    def get_timestamp(input_filepath, row_of_timestamp = 0 ):
+        with open(input_filepath) as f:
+            line = f.readlines()[2 + row_of_timestamp]
+            
+
+        timestamp = datetime.strptime(line.split(';')[1], 
+                                          '%d.%m.%Y %H:%M:%S')
+            
+        return timestamp
 
     def check_version(self, input_filepath):
         ten_min_file = (re.findall(r'(?<=\\)\w+(?=_\d+@)',input_filepath)[0] == r'Wind10')
@@ -227,11 +237,4 @@ class ZephIR300(Reader):
 
 
 
-if __name__ == '__main__':
-    #debugging
-    import netCDF4 as nc
-    path = r'C:\Users\skulla\Documents\Data\zephir\10min\Wind10_401@Y2018_M08_D07-1.CSV'
-    test = ZephIR300()
-    
-    with nc.Dataset('test.nc', 'w', format='NETCDF4') as dataset:
-        loaded_data = test.read_to(dataset, path, None, None)
+

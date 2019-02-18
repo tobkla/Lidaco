@@ -3,6 +3,7 @@ from datetime import datetime
 import numpy as np
 
 
+
 class WLS70(Reader):
 
     def __init__(self):
@@ -13,6 +14,19 @@ class WLS70(Reader):
 
     def output_filename(self, timestamp):
         return timestamp[:-9]
+    
+    @staticmethod
+    def get_timestamp(input_filepath, row_of_timestamp = 0 ):
+        with open(input_filepath) as f:
+            line = f.readlines()[17 * row_of_timestamp + 40: 
+                                    17 * row_of_timestamp + 46]
+            
+        line = [int(value.strip()) for value in line]
+        timestamp = datetime(*line)
+
+        return timestamp
+    
+    
     
     def read_to(self, output_dataset, input_filepaths, parameters, appending):
         wind_file = input_filepaths
@@ -86,3 +100,6 @@ class WLS70(Reader):
             output_dataset.variables['CNR'][ntime:] = np.reshape(ordered_data[:,10].astype(float) , (len(iso8601_array),len(range_list)))
             output_dataset.variables['VEL'][ntime:] = np.reshape(ordered_data[:,11].astype(float)  ,(len(iso8601_array),len(range_list)))        
             output_dataset.variables['DIR'][ntime:] = np.reshape(ordered_data[:,12].astype(float),(len(iso8601_array),len(range_list)))
+            
+            
+            

@@ -1,6 +1,9 @@
 from ..core.Reader import Reader
 import numpy as np
-import datetime
+from datetime import datetime
+
+
+
 
 # Change this to parameters, if necessary.
 doppler_index = 1
@@ -21,7 +24,7 @@ def process_time(timestamp):
     y, m, d = timestamp[:10].split('-')
     h, min_, s = timestamp[11:19].split(':')
     ms = timestamp[20:]
-    dt = datetime.datetime(int(y), int(m), int(d), int(h), int(min_), int(s), int(ms) * 1000)
+    dt = datetime(int(y), int(m), int(d), int(h), int(min_), int(s), int(ms) * 1000)
     return dt.timestamp()
 
 
@@ -96,6 +99,19 @@ class Galion(Reader):
 
     def required_params(self):
         return ['n_gates', 'range_gates', 'constant_gates', 'measurement_scenarios']
+
+    @staticmethod
+    def get_timestamp(input_filepath, row_of_timestamp = 0 ):
+        with open(input_filepath) as f:
+            line = f.readlines()[6 + row_of_timestamp]
+            
+
+        timestamp = datetime.strptime(line.split('\t')[3], 
+                                          '%Y-%m-%d %H:%M:%S.%f')
+            
+        return timestamp
+
+
 
     def read_to(self, output_dataset, input_filepath, configs, appending):
         with open(input_filepath) as file:
@@ -185,3 +201,5 @@ class Galion(Reader):
                         _intensity[initial_index:final_index + 1] = scans[initial_index:final_index + 1, :, intensity_index]
                     create_variables(scan_group, _azimuth, _elevation, _yaw, _pitch, _roll, _doppler, _intensity)
                     scan_index += 1
+
+

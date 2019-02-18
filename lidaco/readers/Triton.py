@@ -1,7 +1,11 @@
 from ..core.Reader import Reader
-from datetime import datetime, timedelta
+from datetime import datetime
 import numpy as np
 import re
+
+
+
+
 
 class Triton(Reader):
 
@@ -13,6 +17,21 @@ class Triton(Reader):
 
     def output_filename(self, timestamp):
         return timestamp[:-9]
+
+    @staticmethod
+    def get_timestamp(input_filepath, row_of_timestamp = 0 ):
+        with open(input_filepath) as f:
+            line = f.readlines()[4 + row_of_timestamp]
+            
+
+        timestamp = datetime.strptime(line.split(';')[0], 
+                                          '%d.%m.%Y %H:%M')
+            
+        return timestamp
+    
+    
+
+
 
     def read_to(self, output_dataset, input_filepaths, parameters, appending):
         wind_file = input_filepaths        
@@ -130,3 +149,6 @@ class Triton(Reader):
                 zip(*[[str2float(value) for value in row] for row in wind_file_data_T[3:len(range_list)*4+1:4]]))
             output_dataset.variables['Quality'][ntime:, :] = list(
                 zip(*[[str2float(value) for value in row] for row in wind_file_data_T[4:len(range_list)*4+1:4]]))
+
+
+

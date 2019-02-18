@@ -1,9 +1,9 @@
 import datetime
 import numpy as np
 from pathlib import Path
-from lidaco.core.Reader import Reader
-import os
+from ..core.Reader import Reader
 import pandas as pd
+
 
 
 
@@ -17,6 +17,26 @@ class Windcubev1(Reader):
         else:
             temp = datetime.datetime.strptime(string1,'%d/%m/%Y %H:%M:%S')
         return temp.isoformat() + 'Z'
+    
+    @staticmethod
+    def get_timestamp(input_filepath, row_of_timestamp = 0 ):
+        
+        with open(input_filepath) as f:
+            line = f.readlines()[57 + row_of_timestamp]
+            
+        filetype = input_filepath.split('.')[1]
+        
+        if filetype == 'rtd':
+            timestamp = datetime.strptime(line.split('\t')[0], 
+                                          '%d/%m/%Y %H:%M:%S.%f')
+            
+        elif filetype == 'sta':
+            timestamp = datetime.strptime(line.split('\t')[0], 
+                                          '%d/%m/%Y %H:%M:%S')
+            
+        return timestamp
+    
+    
     
     @staticmethod
     def str_to_num(string1):
@@ -297,12 +317,4 @@ class Windcubev1(Reader):
                 logfile.write( '%s'%output_dataset.filepath() +'\n')
                 
                 
-if __name__ == '__main__':
-    #debugging purposes
-    import netCDF4 as nc
-    file1 = r'C:\Users\lpauscher\Documents\python_scripts\git\Lidaco\Lidar data\rtd_example\Converted_WLS7-71_2015_06_10__00_00_00.rtd'
-    test = Windcubev1()
-    
-    with nc.Dataset('test.nc', 'w', format='NETCDF4') as dataset:
-        loaded_data = test.load_file(file1)
-        test.read_to(dataset,file1,None,None)
+
