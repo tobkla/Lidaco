@@ -24,7 +24,7 @@ class Logger:
         'grouping': 'Grouping files...',
         'writing_file': 'Writing to {} {}.',
         'exit_msg': 'Failed.',
-        'file_corrupt':'The file {} is corrupt and will be skipped',
+        'file_corrupt':'The file {} is corrupt. Corrupt data has been dropped.',
         'files_not_found': 'No valid files were found.',
         'loading_config': 'Loading configurations from {} .',
         'bad_config_file': 'Failed to load config file. ',

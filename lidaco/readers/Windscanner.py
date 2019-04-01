@@ -9,6 +9,14 @@ class Windscanner(Reader):
     def __init__(self):
         super().__init__(False)
 
+    @staticmethod
+    def try_cast(variable, dtype=float):
+        try:
+            return dtype(variable)
+        except Exception:
+            return np.nan
+
+
     def accepts_file(self, filename):
         return filename.endswith('wind.txt') & (len(filename) > 14)
 
@@ -38,14 +46,16 @@ class Windscanner(Reader):
         wind_file_data = [row.strip().split(';') for row in wind_file_data]
 
         # check if file is corrupt by comparing the count of columns in each row
-        columns_in_row = [len(row) for row in  wind_file_data]
+        columns_in_row = [len(row) for row in wind_file_data]
         median_columns = int(np.median(columns_in_row))
         column_differs = np.not_equal(columns_in_row, median_columns)
         any_column_differs = any(column_differs)
+        
     
         if any_column_differs:
+            wind_file_data = [row for row in wind_file_data if (len(row) == median_columns)]
             Logger.warn('file_corrupt', os.path.split(wind_file)[1] )
-            return 0
+            
         
 
         wind_file_data = list(zip(*wind_file_data))
@@ -293,14 +303,14 @@ class Windscanner(Reader):
             # e.g. radial velocity starts at 5th column 
             # and is then repeated every 9th column
             output_dataset.variables['VEL'][ntime:, :] = list(
-                    zip(*[[float(value) for value in row] 
+                    zip(*[[self.try_cast(value, float) for value in row]
                     for row in wind_file_data[index_columns + 5::4]]))
                 
             output_dataset.variables['CNR'][ntime:, :] = list(
-                    zip(*[[float(value) for value in row] 
+                    zip(*[[self.try_cast(value, float) for value in row]
                     for row in wind_file_data[index_columns + 6::4]]))
             
             output_dataset.variables['WIDTH'][ntime:, :] = list(
-                    zip(*[[float(value) for value in row] 
+                    zip(*[[self.try_cast(value, float) for value in row]
                     for row in wind_file_data[index_columns + 7::4]]))
                 
