@@ -20,7 +20,7 @@ class Windscanner(Reader):
         return filename.endswith('wind.txt') & (len(filename) > 14)
 
     def output_filename(self, timestamp):
-        return timestamp[:-9]
+        return os.path.split(timestamp)[-1][:-9]
     
     def get_timestamp(self, input_filepath, row_of_timestamp = 0 ):
         start_date = datetime(1904,1,1)
@@ -33,7 +33,6 @@ class Windscanner(Reader):
         
         return timestamp
         
-
     def read_to(self, output_dataset, input_filepaths, parameters, appending):
 
         wind_file = input_filepaths
