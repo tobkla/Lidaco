@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from os import listdir
 from itertools import groupby
 from lidaco.common.Logger import Logger
-
+import os
 
 class Reader(ABC):
     """
@@ -27,8 +27,17 @@ class Reader(ABC):
         :param dir_path: directory containing input data files
         :return: [files] | {group => [files]}
         """
+
+
         Logger.info('searching_in_path', dir_path)
-        files = [f for f in listdir(dir_path) if self.accepts_file(f)]
+        # files = [f for f in listdir(dir_path) if self.accepts_file(f)]
+        files=[]
+        for folder, d, filenames in os.walk(dir_path):
+            for filename in filenames:
+                if self.accepts_file(folder + filename):
+                    files.append(folder + '\\' +filename)
+
+
         [Logger.info('found', f) for f in files]
 
         if len(files) == 0:

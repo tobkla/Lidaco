@@ -4,8 +4,8 @@ from datetime import datetime, timedelta
 import numpy as np
 import os
 
-class Windscanner(Reader):
 
+class Windscanner(Reader):
     def __init__(self):
         super().__init__(False)
 
@@ -15,7 +15,6 @@ class Windscanner(Reader):
             return dtype(variable)
         except Exception:
             return np.nan
-
 
     def accepts_file(self, filename):
         return filename.endswith('wind.txt') & (len(filename) > 14)
@@ -313,4 +312,3 @@ class Windscanner(Reader):
             output_dataset.variables['WIDTH'][ntime:, :] = list(
                     zip(*[[self.try_cast(value, float) for value in row]
                     for row in wind_file_data[index_columns + 7::4]]))
-                

@@ -195,6 +195,8 @@ class Builder:
                     complete_path = tuple([path.join(input_path, f) for f in group['files']])
                 else:
                     complete_path = path.join(input_path, group['files'])
+
+
                 reader.read_to(dataset, complete_path, self.configs, not first_of_batch)
 
         Logger.info('done')
