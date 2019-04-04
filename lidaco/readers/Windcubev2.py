@@ -3,7 +3,7 @@ from pathlib import Path
 from ..core.Reader import Reader
 from datetime import datetime
 import pandas as pd
-
+import os
 
 
 
@@ -25,7 +25,7 @@ class Windcubev2(Reader):
         return filename.endswith(('.sta','.rtd','.stdsta'))
 
     def output_filename(self, filename):
-        return filename[:-4]
+        return os.path.split(filename)[-1][:-4]
     
     def parse_time(self, string1):
         if self.parameters['filetype'] == 'rtd':

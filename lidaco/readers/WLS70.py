@@ -1,7 +1,7 @@
 from ..core.Reader import Reader
 from datetime import datetime
 import numpy as np
-
+import os
 
 
 class WLS70(Reader):
@@ -13,7 +13,7 @@ class WLS70(Reader):
         return (filename[-4:] == '.txt') & (len(filename) > 14) & (filename[:5] == 'WLS70')
 
     def output_filename(self, timestamp):
-        return timestamp[:-9]
+        return os.path.split(timestamp)[-1][:-9]
     
     @staticmethod
     def get_timestamp(input_filepath, row_of_timestamp = 0 ):

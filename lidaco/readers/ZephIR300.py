@@ -4,6 +4,7 @@ from datetime import datetime
 import pandas as pd
 import re
 from pathlib import Path
+import os
 
 class ZephIR300(Reader):
 
@@ -14,7 +15,7 @@ class ZephIR300(Reader):
         return (filename.endswith(('.csv','.CSV')) & filename.startswith('Wind'))
 
     def output_filename(self, filename):
-        return filename[:-4]
+        return os.path.split(filename)[-1][:-4]
 
     def parse_time(self, string1):
             try:

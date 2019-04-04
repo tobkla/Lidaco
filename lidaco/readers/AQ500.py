@@ -1,7 +1,7 @@
 import numpy as np
 from ..core.Reader import Reader
 from datetime import datetime
-
+import os
 
 
 
@@ -62,7 +62,7 @@ class AQ500(Reader):
         return filename.endswith('.txt')
 
     def output_filename(self, filename):
-        return filename[:-4]
+        return os.path.split(filename)[-1][:-4]
 
     def read_to(self, output_dataset, input_filepath, configs, appending):
 

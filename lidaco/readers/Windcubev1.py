@@ -3,7 +3,7 @@ import numpy as np
 from pathlib import Path
 from ..core.Reader import Reader
 import pandas as pd
-
+import os
 
 
 
@@ -52,7 +52,7 @@ class Windcubev1(Reader):
         return filename.endswith(('.sta','.rtd'))
 
     def output_filename(self, filename):
-        return filename[:-4]
+        return os.path.split(filename)[-1][:-4]
     
     def load_file(self, input_filepath):
         # read the file header and write to dict

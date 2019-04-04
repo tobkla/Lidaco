@@ -1,7 +1,7 @@
 from ..core.Reader import Reader
 import numpy as np
 from datetime import datetime
-
+import os
 
 
 
@@ -95,7 +95,7 @@ class Galion(Reader):
         return filename.endswith('.scn')
 
     def output_filename(self, filename):
-        return filename[:-4]
+        return os.path.split(filename)[-1][:-4]
 
     def required_params(self):
         return ['n_gates', 'range_gates', 'constant_gates', 'measurement_scenarios']

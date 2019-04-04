@@ -2,7 +2,7 @@ from ..core.Reader import Reader
 from datetime import datetime
 import numpy as np
 import re
-
+import os
 
 
 
@@ -16,7 +16,7 @@ class Triton(Reader):
         return filename.startswith('TritonExport') & (len(filename) > 14) & filename.endswith('.csv')
 
     def output_filename(self, timestamp):
-        return timestamp[:-9]
+        return os.path.split(timestamp)[-1][:-9]
 
     @staticmethod
     def get_timestamp(input_filepath, row_of_timestamp = 0 ):
