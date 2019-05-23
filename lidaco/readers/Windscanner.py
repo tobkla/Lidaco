@@ -112,6 +112,44 @@ class Windscanner(Reader):
             WIDTH.accuracy = ''
             WIDTH.accuracy_info = ''
 
+            azimuth_angle = output_dataset.createVariable('azimuth_angle',
+                                                          'f4', ('time'))
+            azimuth_angle.units = 'degrees'
+            azimuth_angle.long_name = 'azimuth_angle_of_lidar beam'
+            azimuth_angle.comment = ''
+            azimuth_angle.accuracy = ''
+            azimuth_angle.accuracy_info = ''
+
+            azimuth_sweep = output_dataset.createVariable('azimuth_sweep',
+                                                          'f4', ('time'))
+            azimuth_sweep.units = 'degrees'
+            azimuth_sweep.long_name = 'azimuth_sector_swept' \
+                                      '_during_accumulation'
+
+            azimuth_sweep.comment = ''
+            azimuth_sweep.accuracy = ''
+            azimuth_sweep.accuracy_info = ''
+
+            elevation_angle = output_dataset.createVariable(
+                'elevation_angle', 'f4', ('time'))
+            elevation_angle.units = 'degrees'
+            elevation_angle.long_name = 'elevation_angle_of_lidar beam'
+            elevation_angle.comment = ''
+            elevation_angle.accuracy = ''
+            elevation_angle.accuracy_info = ''
+
+            elevation_sweep = output_dataset.createVariable(
+                'elevation_sweep', 'f4', ('time'))
+
+            elevation_sweep.units = 'degrees'
+            elevation_sweep.long_name = 'elevation_sector_' \
+                                        'swept_during_accumulation'
+
+            elevation_sweep.comment = 'Elevation sweeping from ' \
+                                      'approximately 0 to 15 degrees.'
+
+            elevation_sweep.accuracy = ''
+            elevation_sweep.accuracy_info = ''
 
             #%% get timestamps in ISO 8601 format
             start_date = datetime(1904,1,1)
@@ -136,7 +174,7 @@ class Windscanner(Reader):
             elevation_sweep_temp = np.insert(np.abs(
                                     np.diff(elevation_angle_temp)),0,np.nan)
 
-            #%% check if a sweep is existing and writing data accordingly
+
             changing_azimuth = False
             changing_elevation = False
             beam_sweeping = (parameters['attributes']
@@ -144,72 +182,15 @@ class Windscanner(Reader):
             
             if np.nanmedian(azimuth_sweep_temp) > 0:
                 changing_azimuth = True
-                azimuth_angle = output_dataset.createVariable('azimuth_angle',
-                                                              'f4', ('time'))
-            
-                azimuth_sweep = output_dataset.createVariable('azimuth_sweep',
-                                                              'f4', ('time'))
-                azimuth_sweep.units = 'degrees'
-                azimuth_sweep.long_name = 'azimuth_sector_swept' \
-                                            '_during_accumulation'
-                
-                azimuth_sweep.comment = ''
-                azimuth_sweep.accuracy = ''
-                azimuth_sweep.accuracy_info = ''
-            
-                output_dataset.variables['azimuth_angle'][:] = \
-                                                            azimuth_angle_temp
-                output_dataset.variables['azimuth_sweep'][:] = \
-                                                            azimuth_sweep_temp
-                
-            else:
-                azimuth_angle = output_dataset.createVariable('azimuth_angle',
-                                                              'f4')
-                output_dataset.variables['azimuth_angle'][:] = np.nanmedian(
-                                                            azimuth_angle_temp)
-            
-            
+
             if np.nanmedian(elevation_sweep_temp) > 0:
                 changing_elevation = True
-                elevation_angle = output_dataset.createVariable(
-                                            'elevation_angle', 'f4', ('time'))
-        
-                elevation_sweep = output_dataset.createVariable(
-                                            'elevation_sweep', 'f4', ('time'))
-                
-                elevation_sweep.units = 'degrees'
-                elevation_sweep.long_name = 'elevation_sector_' \
-                                                'swept_during_accumulation'
-                                                
-                elevation_sweep.comment = 'Elevation sweeping from ' \
-                                            'approximately 0 to 15 degrees.'
-                                            
-                elevation_sweep.accuracy = ''
-                elevation_sweep.accuracy_info = ''
-        
-                output_dataset.variables['elevation_angle'][:] = \
-                                                        elevation_angle_temp
-                                                        
-                output_dataset.variables['elevation_sweep'][:] = \
-                                                        elevation_sweep_temp
-            else:
-                elevation_angle = output_dataset.createVariable(
-                                                    'elevation_angle', 'f4')
-                
-                output_dataset.variables['elevation_angle'][:] = \
-                                            np.nanmedian(elevation_angle_temp)
-            
-            azimuth_angle.units = 'degrees'
-            azimuth_angle.long_name = 'azimuth_angle_of_lidar beam'
-            azimuth_angle.comment = ''
-            azimuth_angle.accuracy = ''
-            azimuth_angle.accuracy_info = ''
-            
-            elevation_angle.units = 'degrees'
-            elevation_angle.long_name = 'elevation_angle_of_lidar beam'
-            elevation_angle.comment = ''
-            elevation_angle.accuracy = ''
-            elevation_angle.accuracy_info = ''
+
+            output_dataset.variables['azimuth_angle'][:] = azimuth_angle_temp
+            output_dataset.variables['azimuth_sweep'][:] = azimuth_sweep_temp
+            output_dataset.variables['elevation_angle'][:] = elevation_angle_temp
+            output_dataset.variables['elevation_sweep'][:] = elevation_sweep_temp
+
 
             #%% setting scan_type according to sweeps 
             #case LOS
@@ -265,37 +246,22 @@ class Windscanner(Reader):
                                     for value in timestamp_seconds]
             
             
-            output_dataset.variables['time'][ntime:] = \
-                                                    np.array(timestamp_iso8601)
+            output_dataset.variables['time'][ntime:] = np.array(timestamp_iso8601)
             
-            
-            if 'azimuth_sweep' in output_dataset.variables :
-                azimuth_angle_temp = [float(value) 
-                                        for value in wind_file_data[6]]
-            
-                azimuth_sweep_temp = np.insert(np.abs(
-                                        np.diff(azimuth_angle_temp)),0,np.nan)
-                
-                output_dataset.variables['azimuth_angle'][ntime:] = \
-                                                            azimuth_angle_temp
-                                                            
-                                                            
-                output_dataset.variables['azimuth_sweep'][ntime:] = \
-                                                            azimuth_sweep_temp
+            azimuth_angle_temp = [float(value) for value in wind_file_data[6]]
+
+            azimuth_sweep_temp = np.insert(np.abs(np.diff(azimuth_angle_temp)),0,np.nan)
+
+            output_dataset.variables['azimuth_angle'][ntime:] = azimuth_angle_temp
+            output_dataset.variables['azimuth_sweep'][ntime:] = azimuth_sweep_temp
 
 
-            if 'elevation_sweep' in output_dataset.variables :
-                elevation_angle_temp = [float(value) 
-                                        for value in wind_file_data[7]]
-                
-                elevation_sweep_temp = np.insert(np.abs(np.diff(
-                                        elevation_angle_temp)),0,np.nan)
-                
-                output_dataset.variables['elevation_angle'][ntime:] = \
-                                                        elevation_angle_temp
-                                                        
-                output_dataset.variables['elevation_sweep'][ntime:] = \
-                                                        elevation_sweep_temp
+            elevation_angle_temp = [float(value) for value in wind_file_data[7]]
+
+            elevation_sweep_temp = np.insert(np.abs(np.diff(elevation_angle_temp)),0,np.nan)
+
+            output_dataset.variables['elevation_angle'][ntime:] = elevation_angle_temp
+            output_dataset.variables['elevation_sweep'][ntime:] = elevation_sweep_temp
 
 
             # e.g. radial velocity starts at 5th column 
