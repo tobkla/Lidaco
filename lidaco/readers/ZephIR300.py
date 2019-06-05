@@ -1,5 +1,5 @@
 import numpy as np
-from ..core import Reader
+from ..core.Reader import Reader
 from datetime import datetime
 import pandas as pd
 import re
