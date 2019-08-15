@@ -236,6 +236,11 @@ class Windscanner(Reader):
         else: 
             index_columns = 4 - (len(wind_file_data) % 4)
             ntime = len(output_dataset.dimensions["time"])
+            nrange = len(output_dataset.dimensions["range"])
+
+            if nrange != len(wind_file_data[index_columns + 5::4]):
+                Logger.warn('file_corrupt', os.path.split(wind_file)[1])
+                return
             
             start_date = datetime(1904,1,1)
             timestamp_seconds = [int(float(value.strip())) 
@@ -264,11 +269,10 @@ class Windscanner(Reader):
             output_dataset.variables['elevation_sweep'][ntime:] = elevation_sweep_temp
 
 
-            # e.g. radial velocity starts at 5th column 
-            # and is then repeated every 9th column
             output_dataset.variables['VEL'][ntime:, :] = list(
                     zip(*[[self.try_cast(value, float) for value in row]
                     for row in wind_file_data[index_columns + 5::4]]))
+
                 
             output_dataset.variables['CNR'][ntime:, :] = list(
                     zip(*[[self.try_cast(value, float) for value in row]
