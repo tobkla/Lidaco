@@ -36,12 +36,16 @@ class Windscanner(Reader):
     def read_to(self, output_dataset, input_filepaths, parameters, appending):
 
         wind_file = input_filepaths
+        system_file = wind_file[:wind_file.find('_wind.txt')] + '_system.txt'
 
         with open(wind_file) as f:
             wind_file_data = f.readlines()
 
+        with open(system_file) as f:
+            system_file_data = f.readlines()
 
         wind_file_data = [row.strip().split(';') for row in wind_file_data]
+        system_file_data = [row.strip().split(';') for row in system_file_data]
 
         # check if file is corrupt by comparing the count of columns in each row
         columns_in_row = [len(row) for row in wind_file_data]
@@ -52,14 +56,13 @@ class Windscanner(Reader):
     
         if any_column_differs:
             wind_file_data = [row for row in wind_file_data if (len(row) == median_columns)]
+            system_file_data = [row for row in system_file_data if (len(row) == median_columns)]
             Logger.warn('file_corrupt', os.path.split(wind_file)[1] )
-            
-        
 
         wind_file_data = list(zip(*wind_file_data))
+        system_file_data = list(zip(*system_file_data))
 
         if not appending:
-
             index_columns = 4 - (len(wind_file_data) % 4)
             range_list = [float(row[0]) 
                             for row in wind_file_data[index_columns + 4::4]]
@@ -103,6 +106,9 @@ class Windscanner(Reader):
             CNR.comment = ''
             CNR.accuracy = ''
             CNR.accuracy_info = ''
+
+
+
 
             WIDTH = output_dataset.createVariable('WIDTH', 'f4', 
                                                   ('time', 'range'))
@@ -151,8 +157,27 @@ class Windscanner(Reader):
             elevation_sweep.accuracy = ''
             elevation_sweep.accuracy_info = ''
 
+
+
+            roll_angle = output_dataset.createVariable('roll_angle', 'f4', ('time'))
+            roll_angle.units = 'degrees'
+            roll_angle.long_name = 'roll angle of lidar'
+            roll_angle.comment = ''
+            roll_angle.accuracy = ''
+            roll_angle.accuracy_info = ''
+
+            pitch_angle = output_dataset.createVariable('pitch_angle', 'f4', ('time'))
+            pitch_angle.units = 'degrees'
+            pitch_angle.long_name = 'pitch angle of lidar'
+            pitch_angle.comment = ''
+            pitch_angle.accuracy = ''
+            pitch_angle.accuracy_info = ''
+
+
+
+
             #%% get timestamps in ISO 8601 format
-            start_date = datetime(1904,1,1)
+            start_date = datetime(1904, 1, 1)
             timestamp_seconds = [int(float(value.strip())) 
                                     for value in wind_file_data[index_columns]]
             
@@ -169,28 +194,37 @@ class Windscanner(Reader):
                                     for value in wind_file_data[7]]
             
             azimuth_sweep_temp = np.insert(np.abs(np.diff(azimuth_angle_temp)),
-                                           0,np.nan)
+                                           0, np.nan)
             
             elevation_sweep_temp = np.insert(np.abs(
                                     np.diff(elevation_angle_temp)),0,np.nan)
 
+            roll_temp = [float(value) for value in system_file_data[8]]
+            pitch_temp = [float(value) for value in system_file_data[9]]
 
-            changing_azimuth = False
-            changing_elevation = False
+
+
+
             beam_sweeping = (parameters['attributes']
                                 ['beam_sweeping'] == 'true')
             
             if np.nanmedian(azimuth_sweep_temp) > 0:
                 changing_azimuth = True
+            else:
+                changing_azimuth = False
 
             if np.nanmedian(elevation_sweep_temp) > 0:
                 changing_elevation = True
+            else:
+                changing_elevation = False
+
 
             output_dataset.variables['azimuth_angle'][:] = azimuth_angle_temp
             output_dataset.variables['azimuth_sweep'][:] = azimuth_sweep_temp
             output_dataset.variables['elevation_angle'][:] = elevation_angle_temp
             output_dataset.variables['elevation_sweep'][:] = elevation_sweep_temp
-
+            output_dataset.variables['roll_angle'][:] = roll_temp
+            output_dataset.variables['pitch_angle'][:] = pitch_temp
 
             #%% setting scan_type according to sweeps 
             #case LOS
@@ -267,6 +301,11 @@ class Windscanner(Reader):
 
             output_dataset.variables['elevation_angle'][ntime:] = elevation_angle_temp
             output_dataset.variables['elevation_sweep'][ntime:] = elevation_sweep_temp
+
+            roll_temp = [float(value) for value in system_file_data[8]]
+            pitch_temp = [float(value) for value in system_file_data[9]]
+            output_dataset.variables['roll_angle'][:] = roll_temp
+            output_dataset.variables['pitch_angle'][:] = pitch_temp
 
 
             output_dataset.variables['VEL'][ntime:, :] = list(
