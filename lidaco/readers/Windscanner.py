@@ -199,8 +199,8 @@ class Windscanner(Reader):
             elevation_sweep_temp = np.insert(np.abs(
                                     np.diff(elevation_angle_temp)),0,np.nan)
 
-            roll_temp = [float(value) for value in system_file_data[8]]
-            pitch_temp = [float(value) for value in system_file_data[9]]
+            roll_temp = [float(value) for value in system_file_data[7]]
+            pitch_temp = [float(value) for value in system_file_data[8]]
 
 
 
@@ -302,8 +302,8 @@ class Windscanner(Reader):
             output_dataset.variables['elevation_angle'][ntime:] = elevation_angle_temp
             output_dataset.variables['elevation_sweep'][ntime:] = elevation_sweep_temp
 
-            roll_temp = [float(value) for value in system_file_data[8]]
-            pitch_temp = [float(value) for value in system_file_data[9]]
+            roll_temp = [float(value) for value in system_file_data[7]]
+            pitch_temp = [float(value) for value in system_file_data[8]]
             output_dataset.variables['roll_angle'][:] = roll_temp
             output_dataset.variables['pitch_angle'][:] = pitch_temp
 
